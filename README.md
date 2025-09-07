@@ -17,4 +17,4 @@ I may add more in the future.
 
 ## Installation
 
-Copy [./BattlerStates.js](BattlerStates.js) into your plugins folder. [https://www.rpgmakerweb.com/blog/using-plugins-in-mz](Full instructions)
+Copy [BattlerStates.js](./BattlerStates.js) into your plugins folder. [Full instructions](https://www.rpgmakerweb.com/blog/using-plugins-in-mz)
