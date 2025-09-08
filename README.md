@@ -2,9 +2,11 @@
 
 This plugin for RPG Maker MZ give battlers unique visual effects based on their states.
 
-For example, you could add a "Vanished" state that includes `<effect:translucent>`. Whenever a character gains the Vanished state, their battler will look like the top battler in this screenshot:
+For example, you could add a "Vanished" state that includes `<effect:translucent>`. Whenever a character gains the Vanished state, their battler will look like the top battler in this first screenshot:
 
-![Screenshot](effects-demo.png)
+| translucent, white, blur, grain                                                  | outlines                                                    |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| ![Screenshot of translucent, white, blur and grain](effect-translucent-demo.png) | ![Screenshot of various outlines](effect-outlines-demo.png) |
 
 Supported effects:
 
