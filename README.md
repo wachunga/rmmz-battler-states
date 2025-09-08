@@ -8,16 +8,20 @@ For example, you could add a "Vanished" state that includes `<effect:translucent
 
 Supported effects:
 
-- `<effect:translucent>`
-- `<effect:blur>`
-- `<effect:grain>`
 - `<effect:white>`
 - `<effect:black>`
 - `<effect:red>`
 - `<effect:green>`
 - `<effect:blue>`
-
-I may add more in the future.
+- `<effect:outline-white>`
+- `<effect:outline-black>`
+- `<effect:outline-red>`
+- `<effect:outline-green>`
+- `<effect:outline-blue>`
+- `<effect:translucent>`
+- `<effect:blur>`
+- `<effect:grain>`
+- `<effect:invert>`
 
 ## Installation
 
