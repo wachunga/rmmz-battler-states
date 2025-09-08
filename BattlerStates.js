@@ -12,6 +12,8 @@
  * To use, simply add one of the following to states:
  * <effect:whiten>
  * <effect:translucent>
+ * <effect:blur>
+ * <effect:grain>
  *
  * (May add more in the future)
  */
@@ -22,6 +24,23 @@
     this.setBlendColor([0, 0, 0, 0]);
     this.blendMode = 0;
     this.opacity = 255;
+    this.filters = [];
+  };
+
+  Sprite.prototype._createBlurFilter = function () {
+    // this._blurFilter = new PIXI.filters.BlurFilterPass(true,10);
+    this._blurFilter = new PIXI.filters.BlurFilter(6);
+    if (!this.filters) {
+      this.filters = [];
+    }
+    this.filters.push(this._blurFilter);
+  };
+  Sprite.prototype._createNoiseFilter = function () {
+    this._noiseFilter = new PIXI.filters.NoiseFilter(0.5);
+    if (!this.filters) {
+      this.filters = [];
+    }
+    this.filters.push(this._noiseFilter);
   };
 
   const _Sprite_Actor_update = Sprite_Actor.prototype.update;
@@ -31,8 +50,8 @@
       if (this._actor._needsEffectsInit) {
         this.initEffects();
         this._actor._needsEffectsInit = false;
-      }
-      if (this._actor._needsEffectsRefresh) {
+        this._actor._needsEffectsRefresh = false;
+      } else if (this._actor._needsEffectsRefresh) {
         this.resetEffects();
         this._actor._needsEffectsRefresh = false;
       }
@@ -51,8 +70,11 @@
       if (effect === "whiten") {
         this.setColorTone([180, 180, 180, 255]);
       } else if (effect === "translucent") {
-        this.setColorTone([180, 180, 180, 255]);
-        this.opacity = 120;
+        this.opacity = 50;
+      } else if (effect === "blur") {
+        this._createBlurFilter();
+      } else if (effect === "grain") {
+        this._createNoiseFilter();
       }
     });
   };

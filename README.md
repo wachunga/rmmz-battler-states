@@ -12,6 +12,8 @@ Supported effects:
 
 - `<effect:whiten>`
 - `<effect:translucent>`
+- `<effect:blur>`
+- `<effect:grain>`
 
 I may add more in the future.
 
