@@ -9,9 +9,13 @@ For example, you could add a "Vanished" state that includes `<effect:translucent
 Supported effects (top to bottom order):
 
 - `<effect:translucent>`
-- `<effect:whiten>`
 - `<effect:blur>`
 - `<effect:grain>`
+- `<effect:white>`
+- `<effect:black>`
+- `<effect:red>`
+- `<effect:green>`
+- `<effect:blue>`
 
 I may add more in the future.
 

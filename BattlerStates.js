@@ -10,12 +10,14 @@
  * @help BattlerStates.js
  *
  * To use, simply add one of the following to states:
- * <effect:whiten>
  * <effect:translucent>
  * <effect:blur>
  * <effect:grain>
- *
- * (May add more in the future)
+ * <effect:white>
+ * <effect:black>
+ * <effect:red>
+ * <effect:green>
+ * <effect:blue>
  */
 
 (() => {
@@ -67,14 +69,31 @@
 
     statesWithEffects.forEach((state) => {
       const effect = state.meta.effect;
-      if (effect === "whiten") {
-        this.setColorTone([180, 180, 180, 255]);
-      } else if (effect === "translucent") {
-        this.opacity = 50;
-      } else if (effect === "blur") {
-        this._createBlurFilter();
-      } else if (effect === "grain") {
-        this._createNoiseFilter();
+      switch (effect) {
+        case "white":
+          this.setColorTone([180, 180, 180, 255]);
+          break;
+        case "black":
+          this.setColorTone([-150, -150, -150, 255]);
+          break;
+        case "red":
+          this.setColorTone([180, 0, 0, 255]);
+          break;
+        case "green":
+          this.setColorTone([0, 100, 0, 255]);
+          break;
+        case "blue":
+          this.setColorTone([0, 0, 180, 255]);
+          break;
+        case "translucent":
+          this.opacity = 50;
+          break;
+        case "blur":
+          this._createBlurFilter();
+          break;
+        case "grain":
+          this._createNoiseFilter();
+          break;
       }
     });
   };
