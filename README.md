@@ -6,7 +6,7 @@ For example, you could add a "Vanished" state that includes `<effect:translucent
 
 ![Screenshot](effects-demo.png)
 
-Supported effects (top to bottom order):
+Supported effects:
 
 - `<effect:translucent>`
 - `<effect:blur>`
