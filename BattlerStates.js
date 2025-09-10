@@ -9,21 +9,28 @@
  *
  * @help BattlerStates.js
  *
- * To use, simply add one of the following to states:
- * <effect:white>
- * <effect:black>
- * <effect:red>
- * <effect:green>
- * <effect:blue>
- * <effect:outline-white>
- * <effect:outline-black>
- * <effect:outline-red>
- * <effect:outline-green>
- * <effect:outline-blue>
- * <effect:translucent>
- * <effect:blur>
- * <effect:grain>
- * <effect:invert>
+ * To use, simply add one of the following to the Note box of a state:
+ * <battler:color r,g,b,gray> (where each is 0 to 255)
+ * <battler:white>
+ * <battler:black>
+ * <battler:red>
+ * <battler:green>
+ * <battler:blue>
+ * <battler:outline-white>
+ * <battler:outline-black>
+ * <battler:outline-red>
+ * <battler:outline-green>
+ * <battler:outline-blue>
+ * <battler:translucent>
+ * <battler:blur>
+ * <battler:grain>
+ * <battler:invert>
+ * <battler:shrink>
+ * <battler:grow>
+ * <battler:size x> (where x is a decimal number, 1 being default)
+ *
+ * Heads up: the "[SV] Overlay" of a state (if used) will also be affected.
+ * For example, it will change color tone based on the state.
  */
 
 (() => {
@@ -33,6 +40,8 @@
     this.blendMode = 0;
     this.opacity = 255;
     this.filters = [];
+    this.scale.x = 1;
+    this.scale.y = 1;
   };
 
   Sprite.prototype._createBlurFilter = function () {
@@ -57,7 +66,7 @@
     }
     this.filters.push(filter);
   };
-  Sprite.prototype._createOutlineFilter = function (color) {
+  Sprite.prototype._createOutlineFilter = function (color = 0xff0000) {
     const filter = new OutlineFilter();
     filter.color = color;
     filter.thickness = 3;
@@ -88,11 +97,22 @@
 
     const statesWithEffects = this._actor
       .states()
-      .filter((state) => state.meta.effect);
-
+      .filter((state) => state.meta.battler);
     statesWithEffects.forEach((state) => {
-      const effect = state.meta.effect;
-      switch (effect) {
+      // TODO: handle multiple effects by parsing state.note.split('\n') etc
+      const effect = state.meta.battler;
+      const [id, ...params] = effect.split(/\s|,/).filter(Boolean);
+      // console.debug({ id, params });
+      switch (id) {
+        case "color":
+          if (params.length != 4) {
+            onError(
+              `failed to parse color notetag — expected format is: red,green,blue,gray`
+            );
+          }
+          // const [r, g, b, gray] = params;
+          this.setColorTone(params);
+          break;
         case "white":
           this.setColorTone([180, 180, 180, 255]);
           break;
@@ -135,16 +155,36 @@
         case "invert":
           this._createNegativeFilter();
           break;
+        case "shrink":
+          this.scale.x = 0.5;
+          this.scale.y = 0.5;
+          break;
+        case "grow":
+          this.scale.x = 1.5;
+          this.scale.y = 1.5;
+          break;
+        case "size":
+          const scaleParam = parseFloat(params[0]);
+          if (isNaN(scaleParam)) {
+            onError(`failed to parse size notetag ${effect}`);
+          }
+          this.scale.x = scaleParam;
+          this.scale.y = scaleParam;
+          break;
       }
     });
   };
+
+  function onError(message) {
+    throw new Error(`[BattlerStates plugin] ${message}`);
+  }
 
   const _Game_BattlerBase_addNewState = Game_BattlerBase.prototype.addNewState;
   Game_BattlerBase.prototype.addNewState = function (stateId) {
     _Game_BattlerBase_addNewState.call(this, stateId);
 
     // set a flag if the new state has an effect
-    const hasEffect = Boolean($dataStates[stateId].meta.effect);
+    const hasEffect = Boolean($dataStates[stateId].meta.battler);
     if (hasEffect) {
       this._needsEffectsInit = true;
     }
@@ -155,7 +195,7 @@
     _Game_Actor_eraseState.call(this, stateId);
 
     // set a flag if the removed state had an effect and needs cleaned up
-    const hasEffect = Boolean($dataStates[stateId].meta.effect);
+    const hasEffect = Boolean($dataStates[stateId].meta.battler);
     if (hasEffect) {
       this._needsEffectsRefresh = true;
     }
