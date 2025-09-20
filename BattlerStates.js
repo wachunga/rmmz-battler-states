@@ -7,33 +7,62 @@
  * @plugindesc Give battlers unique visual effects based on their states.
  * @author wachunga
  *
+ * @param outlineThickness
+ * @text Outline Thickness
+ * @desc The thickness of the outline effect.
+ * @type number
+ * @min 1
+ * @max 10
+ * @default 3
+ *
  * @help BattlerStates.js
  *
  * To use, simply add one of the following to the Note box of a state:
+ *
  * <battler:color r,g,b,gray> (where each is 0 to 255)
  * <battler:white>
  * <battler:black>
  * <battler:red>
  * <battler:green>
  * <battler:blue>
+ * <battler:purple>
+ * <battler:brown>
+ * <battler:orange>
+ * <battler:pink>
+ * <battler:yellow>
+ * <battler:cyan>
+ *
+ * <battler:outline-color r,g,b> (where each is 0 to 255)
  * <battler:outline-white>
  * <battler:outline-black>
  * <battler:outline-red>
  * <battler:outline-green>
  * <battler:outline-blue>
- * <battler:translucent>
+ * <battler:outline-purple>
+ * <battler:outline-brown>
+ * <battler:outline-orange>
+ * <battler:outline-pink>
+ * <battler:outline-yellow>
+ * <battler:outline-cyan>
+ *
+ * <battler:opacity x> (where x is 0 to 255, 0 being fully transparent)
+ * <battler:translucent> (same as <battler:opacity 50>)
+ *
  * <battler:blur>
  * <battler:grain>
  * <battler:invert>
- * <battler:shrink>
- * <battler:grow>
- * <battler:size x> (where x is a decimal number, 1 being default)
+ *
+ * <battler:size x> (where x is a decimal number, 1.0 being default)
+ * <battler:shrink> (same as <battler:size 0.5>)
+ * <battler:grow> (same as <battler:size 1.5>)
  *
  * Heads up: the "[SV] Overlay" of a state (if used) will also be affected.
  * For example, it will change color tone based on the state.
  */
 
 (() => {
+  const pluginName = "BattlerStates";
+
   Sprite.prototype.resetEffects = function () {
     this.setColorTone([0, 0, 0, 0]);
     this.setBlendColor([0, 0, 0, 0]);
@@ -66,11 +95,13 @@
     }
     this.filters.push(filter);
   };
-  Sprite.prototype._createOutlineFilter = function (color = 0xff0000) {
+  Sprite.prototype._createOutlineFilter = function (color) {
     const filter = new OutlineFilter();
     filter.color = color;
-    filter.thickness = 3;
-    filter.alpha = 0.8;
+    const thickness =
+      PluginManager.parameters(pluginName).outlineThickness || 3;
+    filter.thickness = thickness;
+    filter.alpha = 1;
     if (!this.filters) {
       this.filters = [];
     }
@@ -92,6 +123,34 @@
     }
   };
 
+  const colorMap = {
+    white: [180, 180, 180, 255],
+    black: [-150, -150, -150, 255],
+    red: [180, 0, 0, 255],
+    green: [0, 100, 0, 255],
+    blue: [0, 0, 180, 255],
+    purple: [128, 0, 128, 255],
+    brown: [139, 69, 19, 255],
+    orange: [255, 69, 0, 255],
+    pink: [255, 192, 203, 255],
+    yellow: [255, 255, 0, 255],
+    cyan: [0, 255, 255, 255],
+  };
+
+  // eg [128, 0, 128] => 0x800080
+  function rgbToHexNumber(rgb) {
+    const [r, g, b] = rgb;
+    const red = componentToHex(r);
+    const green = componentToHex(g);
+    const blue = componentToHex(b);
+    return parseInt(`0x${red}${green}${blue}`);
+  }
+
+  function componentToHex(c) {
+    var hex = Number(c).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  }
+
   Sprite_Actor.prototype.initEffects = function () {
     if (!this._actor) return;
 
@@ -110,38 +169,52 @@
               `failed to parse color notetag — expected format is: red,green,blue,gray`
             );
           }
-          // const [r, g, b, gray] = params;
           this.setColorTone(params);
           break;
         case "white":
-          this.setColorTone([180, 180, 180, 255]);
-          break;
         case "black":
-          this.setColorTone([-150, -150, -150, 255]);
-          break;
         case "red":
-          this.setColorTone([180, 0, 0, 255]);
-          break;
         case "green":
-          this.setColorTone([0, 100, 0, 255]);
-          break;
         case "blue":
-          this.setColorTone([0, 0, 180, 255]);
+        case "purple":
+        case "brown":
+        case "orange":
+        case "pink":
+        case "yellow":
+        case "cyan":
+          this.setColorTone(colorMap[id]);
+          break;
+        case "outline-color":
+          if (params.length != 3) {
+            onError(
+              `failed to parse outline-color notetag — expected format is: red,green,blue`
+            );
+          }
+          const hex = rgbToHexNumber(params);
+          this._createOutlineFilter(hex);
           break;
         case "outline-white":
-          this._createOutlineFilter(0xffffff);
-          break;
         case "outline-black":
-          this._createOutlineFilter(0x000000);
-          break;
         case "outline-red":
-          this._createOutlineFilter(0xff0000);
-          break;
         case "outline-green":
-          this._createOutlineFilter(0x00ff00);
-          break;
         case "outline-blue":
-          this._createOutlineFilter(0x0000ff);
+        case "outline-purple":
+        case "outline-brown":
+        case "outline-orange":
+        case "outline-pink":
+        case "outline-yellow":
+        case "outline-cyan":
+          const outlineColor = id.split("-")[1];
+          const outlineRgb = colorMap[outlineColor];
+          const outlineHex = rgbToHexNumber(outlineRgb);
+          this._createOutlineFilter(outlineHex);
+          break;
+        case "opacity":
+          const opacityParam = parseFloat(params[0]);
+          if (isNaN(opacityParam)) {
+            onError(`failed to parse opacity notetag ${effect}`);
+          }
+          this.opacity = opacityParam;
           break;
         case "translucent":
           this.opacity = 50;
